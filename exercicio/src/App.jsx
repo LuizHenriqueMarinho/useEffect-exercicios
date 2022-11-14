@@ -4,7 +4,7 @@ import './styles.css'
 
 const TarefaList = styled.ul`
   padding: 0;
-  width: 200px;
+  width: 300px;
 `
 
 const Tarefa = styled.li`
@@ -23,43 +23,74 @@ function App() {
   const [inputValue, setInputValue] = useState("");
   const [filtro, setFiltro] = useState("")
 
-  // useEffect() => {
-  //   () => {
+  useEffect(() => {
+    if(tarefas.length > 0) // não entra quando estiver vazio""
+    {
+      const listaTarefas = JSON.stringify(tarefas) //transforma em string
+      localStorage.setItem("tarefas", listaTarefas) //cria ou substitui o item
+    } 
+  },[tarefas]);
 
-  //   },
-  //   []
-  // };
+  useEffect(() => {
+    const tarefasJson = localStorage.getItem("tarefas");
+    if(tarefasJson)
+    {
+      const tarefasArray = JSON.parse(tarefasJson)//transforma de string para array
+      setTarefa(tarefasArray)
+    }
+  },[]);
 
-  // useEffect() => {
-  //   () => {
-
-  //   },
-  //   []
-  // };
 
   const onChangeInput = (event) => {
-    console.log("aaa");
+    setInputValue(event.target.value)
   }
 
   const criaTarefa = () => {
-    console.log("aaa");
+    let id = Date.now()
+    let texto = inputValue
+    let isComplete = false
+    let tarefa = 
+    {
+      id: id,
+      texto: texto,
+      isComplete: isComplete
+    }
+
+    setTarefa([...tarefas, tarefa])
+    setInputValue("")
+    console.log(tarefas)
   }
 
   const selectTarefa = (id) => {
-    console.log("aaa");
+    let novaListaTarefas = tarefas.map(tarefa => {
+      if(tarefa.id ===id)
+      {
+        const novaTarefa = {
+          ...tarefa,
+          isComplete: !tarefa.isComplete
+        }
+        return novaTarefa
+      }
+    else
+    {
+      return tarefa
+    }
+    })
+    console.log(novaListaTarefas)
+    setTarefa(novaListaTarefas)
   }
 
   const onChangeFilter = (event) => {
-    console.log("aaa");
+    setFiltro(event.target.value)
   }
 
 
   const listaFiltrada = tarefas.filter(tarefa => {
     switch (filtro) {
       case 'pendentes':
-        return !tarefa.completa
+        return tarefa.isComplete === false
       case 'completas':
-        return tarefa.completa
+        return tarefa.isComplete === true
       default:
         return true
     }
@@ -87,10 +118,11 @@ function App() {
         {listaFiltrada.map(tarefa => {
           return (
             <Tarefa
+              key = {tarefa.id} //importante para resolver warnings
               completa={tarefa.completa}
               onClick={() => selectTarefa(tarefa.id)}
             >
-              {tarefa.texto}
+              {tarefa.texto} - {tarefa.isComplete? "completa":"pendente"}
             </Tarefa>
           )
         })}
